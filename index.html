@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text From The Void</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: #eee;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #aaa;
+      text-align: center;
+    }
+
+    #inputBox {
+      background: #111;
+      border: none;
+      border-bottom: 2px solid #333;
+      padding: 10px;
+      width: 300px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    #submitBtn, #saveBtn {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-right: 5px;
+    }
+
+    #submitBtn:hover, #saveBtn:hover {
+      background: #333;
+    }
+
+    #response {
+      margin-top: 30px;
+      max-width: 600px;
+      font-size: 1.2rem;
+      color: #9ff;
+      text-align: center;
+      white-space: pre-line;
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    .fade-in {
+      opacity: 1 !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>Send a message into the void</h1>
+  <input type="text" id="inputBox" placeholder="Type your message..." maxlength="200" />
+  <div>
+    <button id="submitBtn">Transmit</button>
+    <button id="saveBtn" style="display:none;">Save Your Whisper</button>
+  </div>
+  <div id="response"></div>
+
+  <!-- Static Audio -->
+  <audio id="staticAudio" src="static.wav" preload="auto"></audio>
+
+  <canvas id="canvas" width="600" height="300" style="display:none;"></canvas>
+
+  <script>
+    const responses = [
+      "The stars forgot your name, but I remember.",
+      "Even silence grows tired of being ignored.",
+      "You are a ripple in a sea of ghosts.",
+      "All your echoes are still out there, waiting.",
+      "Ask less. Dream louder.",
+      "There is no future. Only repeats.",
+      "It already happened. You just don’t know when.",
+      "{404: meaning not found}",
+      "{ERROR: RECURSION DETECTED}",
+      "The cheese remembers.",
+      "42, but in screaming.",
+      "The void just laughed. That’s rare.",
+    ];
+
+    const input = document.getElementById("inputBox");
+    const button = document.getElementById("submitBtn");
+    const saveButton = document.getElementById("saveBtn");
+    const responseBox = document.getElementById("response");
+    const staticAudio = document.getElementById("staticAudio");
+
+    function getRandomResponse() {
+      const index = Math.floor(Math.random() * responses.length);
+      return responses[index];
+    }
+
+    button.addEventListener("click", () => {
+      const message = input.value.trim();
+      if (!message) return;
+
+      responseBox.classList.remove("fade-in");
+      responseBox.textContent = "Receiving...";
+      saveButton.style.display = "none";
+
+      setTimeout(() => {
+        const reply = getRandomResponse();
+        responseBox.textContent = reply;
+        responseBox.classList.add("fade-in");
+
+        staticAudio.currentTime = 0;
+        staticAudio.play();
+
+        saveButton.style.display = "inline-block";
+      }, 1000);
+    });
+
+    saveButton.addEventListener("click", () => {
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#0b0b0b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#aaa";
+      ctx.font = "16px Courier New";
+      ctx.fillText("You said:", 20, 40);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(`"${input.value}"`, 20, 70);
+
+      ctx.fillStyle = "#9ff";
+      ctx.font = "20px Courier New";
+      wrapText(ctx, responseBox.textContent, 20, 130, 560, 28);
+
+      const link = document.createElement("a");
+      link.download = "whisper.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+  </script>
+</body>
+</html>
