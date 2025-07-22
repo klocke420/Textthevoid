@@ -1,174 +1,143 @@
-
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Text From The Void</title>
   <style>
     body {
-      margin: 0;
-      background: #0b0b0b;
-      color: #eee;
+      background: black;
+      color: #ccc;
       font-family: 'Courier New', monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      color: #aaa;
+      height: 100vh;
+      padding: 1rem;
       text-align: center;
     }
-
-    #inputBox {
+    input, button {
+      margin: 10px;
+      padding: 0.5rem;
+      font-size: 1.1rem;
       background: #111;
-      border: none;
-      border-bottom: 2px solid #333;
-      padding: 10px;
-      width: 300px;
-      color: #fff;
-      font-size: 1rem;
-      outline: none;
+      color: #ccc;
+      border: 1px solid #333;
     }
-
-    #submitBtn, #saveBtn {
-      margin-top: 15px;
-      padding: 8px 16px;
-      background: #222;
-      color: #eee;
-      border: 1px solid #444;
-      cursor: pointer;
-      transition: 0.3s;
-      margin-right: 5px;
-    }
-
-    #submitBtn:hover, #saveBtn:hover {
-      background: #333;
-    }
-
-    #response {
-      margin-top: 30px;
+    .response {
+      margin-top: 2rem;
+      font-size: 1.3rem;
       max-width: 600px;
-      font-size: 1.2rem;
-      color: #9ff;
-      text-align: center;
-      white-space: pre-line;
-      opacity: 0;
-      transition: opacity 1s ease-in;
-    }
-
-    .fade-in {
-      opacity: 1 !important;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
-  <h1>Send a message into the void</h1>
-  <input type="text" id="inputBox" placeholder="Type your message..." maxlength="200" />
-  <div>
-    <button id="submitBtn">Transmit</button>
-    <button id="saveBtn" style="display:none;">Save Your Whisper</button>
-  </div>
-  <div id="response"></div>
+  <h1>Text From The Void</h1>
+  <p>Speak into the silence...</p>
+  <input id="userInput" placeholder="Type your message..." />
+  <button onclick="summonVoid()">Send</button>
+  <div class="response" id="responseText"></div>
+  <audio id="staticSound" preload="auto">
+    <source src="deep-eerie-tone.wav" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>  <script>
+    const responses = {
+      existential: [
+        "It already happened. You just don't know when.",
+        "You are a ripple in a sea of ghosts.",
+        "Even silence grows tired of being ignored.",
+        "Ask less. Dream louder.",
+        "You blinked — that's when it changed.",
+        "The stars weep in patterns you can't translate.",
+        "This moment is infinite and forgotten.",
+        "You are the question and the echo.",
+        "Oblivion hums your name softly.",
+        "Truth is allergic to attention."
+      ],
+      love: [
+        "They loved you until they didn't.",
+        "Love fades in the void.",
+        "You were enough. They weren't whole.",
+        "All things beautiful are cursed to disappear.",
+        "Some echoes never return.",
+        "Your heart wasn't broken, just misplaced.",
+        "They kissed you like they owed you goodbye.",
+        "Loneliness speaks in lullabies.",
+        "The touch never existed, only the wanting.",
+        "You loved a memory."
+      ],
+      why: [
+        "Because it had to be you.",
+        "Because endings are easier to write than middles.",
+        "Because the stars forgot your name.",
+        "Because it listened and still left.",
+        "Why not?",
+        "The void doesn't explain. It absorbs.",
+        "What you seek is beneath the floorboards.",
+        "You asked. That was the mistake.",
+        "Because it was written backwards.",
+        "Some reasons rot with time."
+      ],
+      nonsense: [
+        "The cheese remembers.",
+        "Lick the void. Taste the static.",
+        "Purple regrets are tastier in moonlight.",
+        "You're the 404th visitor to scream into the void today!",
+        "42, but in screaming.",
+        "The moon hums upside down.",
+        "Drink the clock, become the hour.",
+        "Marshmallow logic and tapeworm dreams.",
+        "No left turns in spiral hallways.",
+        "Banana ghosts whisper in binary."
+      ],
+      glitch: [
+        "{ERROR: RECURSION DETECTED}",
+        "{404: meaning not found}",
+        "This interaction has been archived by mistake.",
+        "Message too human. Try unfeeling.",
+        "//whisper corrupted//try again//",
+        "gl!tch.gl!tch.gl!tch",
+        "¯\\_(ツ)_/¯ *system sighs*",
+        "01001000 01100101 01101100 01101100",
+        "LOOP COUNT EXCEEDED. REVERTING. REVERTING. REVERTING.",
+        "You broke it. That was the point."
+      ],
+      general: [
+        "The stars are listening.",
+        "Your echo has been filed.",
+        "You are not alone in the static.",
+        "It heard you, but it wept.",
+        "A whisper has been saved.",
+        "Someone else typed this before you.",
+        "What you say becomes threadbare.",
+        "The silence bows politely.",
+        "Noted. Forgotten. Echoed.",
+        "Transmission recorded under dust."
+      ]
+    };
 
-  <!-- Static Audio -->
-  <audio id="staticAudio" src="static.wav" preload="auto"></audio>
-
-  <canvas id="canvas" width="600" height="300" style="display:none;"></canvas>
-
-  <script>
-    const responses = [
-      "The stars forgot your name, but I remember.",
-      "Even silence grows tired of being ignored.",
-      "You are a ripple in a sea of ghosts.",
-      "All your echoes are still out there, waiting.",
-      "Ask less. Dream louder.",
-      "There is no future. Only repeats.",
-      "It already happened. You just don’t know when.",
-      "{404: meaning not found}",
-      "{ERROR: RECURSION DETECTED}",
-      "The cheese remembers.",
-      "42, but in screaming.",
-      "The void just laughed. That’s rare.",
-    ];
-
-    const input = document.getElementById("inputBox");
-    const button = document.getElementById("submitBtn");
-    const saveButton = document.getElementById("saveBtn");
-    const responseBox = document.getElementById("response");
-    const staticAudio = document.getElementById("staticAudio");
-
-    function getRandomResponse() {
-      const index = Math.floor(Math.random() * responses.length);
-      return responses[index];
+    function matchCategory(text) {
+      const t = text.toLowerCase();
+      if (t.includes("death") || t.includes("die") || t.includes("nothing")) return "existential";
+      if (t.includes("love") || t.includes("heart") || t.includes("feel")) return "love";
+      if (t.includes("why") || t.includes("how") || t.includes("what")) return "why";
+      if (t.includes("cheese") || t.includes("void") || t.includes("ducks")) return "nonsense";
+      if (t.includes("error") || t.includes("glitch") || t.includes("404")) return "glitch";
+      return "general";
     }
 
-    button.addEventListener("click", () => {
-      const message = input.value.trim();
-      if (!message) return;
+    function summonVoid() {
+      const input = document.getElementById("userInput").value;
+      const category = matchCategory(input);
+      const options = responses[category];
+      const reply = options[Math.floor(Math.random() * options.length)];
+      document.getElementById("responseText").innerText = reply + "\n\n(Saved your whisper.)";
 
-      responseBox.classList.remove("fade-in");
-      responseBox.textContent = "Receiving...";
-      saveButton.style.display = "none";
-
-      setTimeout(() => {
-        const reply = getRandomResponse();
-        responseBox.textContent = reply;
-        responseBox.classList.add("fade-in");
-
-        staticAudio.currentTime = 0;
-        staticAudio.play();
-
-        saveButton.style.display = "inline-block";
-      }, 1000);
-    });
-
-    saveButton.addEventListener("click", () => {
-      const canvas = document.getElementById("canvas");
-      const ctx = canvas.getContext("2d");
-
-      ctx.fillStyle = "#0b0b0b";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#aaa";
-      ctx.font = "16px Courier New";
-      ctx.fillText("You said:", 20, 40);
-      ctx.fillStyle = "#fff";
-      ctx.fillText(`"${input.value}"`, 20, 70);
-
-      ctx.fillStyle = "#9ff";
-      ctx.font = "20px Courier New";
-      wrapText(ctx, responseBox.textContent, 20, 130, 560, 28);
-
-      const link = document.createElement("a");
-      link.download = "whisper.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    });
-
-    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-      const words = text.split(' ');
-      let line = '';
-      for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        const testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
-          ctx.fillText(line, x, y);
-          line = words[n] + ' ';
-          y += lineHeight;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line, x, y);
+      const audio = document.getElementById("staticSound");
+      audio.volume = 1.0;
+      audio.currentTime = 0;
+      audio.play().catch(e => console.log("Audio play failed:", e));
     }
-  </script>
-</body>
+  </script></body>
 </html>
